@@ -62,3 +62,34 @@ export const deleteTodo = async (req, res) => {
     res.status(500).send({ success: false, error: error.message });
   }
 };
+
+// find todo
+export const findTodo = async (req, res) => {
+  try {
+    const todoId = req.params.todoId;
+
+    // Validate todoId presence
+    if (!todoId) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Todo ID is required" });
+    }
+
+    const [rows] = await pool.query("SELECT * FROM todos WHERE _id = ?", [
+      todoId,
+    ]);
+
+    // check if found
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Todo not found" });
+    }
+
+    const todo = rows[0];
+    res.status(200).send({ success: true, todo });
+  } catch (error) {
+    console.error("Error finding the todo", error);
+    res.status(500).send({ success: false, error: error.message });
+  }
+};

@@ -31,3 +31,34 @@ export const newTodo = async (req, res) => {
     res.status(500).send({ success: false, error: error.message });
   }
 };
+
+//Delete todo
+export const deleteTodo = async (req, res) => {
+  try {
+    const todoId = req.params.todoId;
+
+    if (!todoId) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Todo ID is required" });
+    }
+
+    // find and delete todo from the database
+    const deleteTodoQuery = "DELETE FROM todos WHERE _id = ?";
+    const [result] = await pool.query(deleteTodoQuery, [todoId]);
+
+    // Check if a todo was deleted
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Todo not found" });
+    }
+
+    res
+      .status(200)
+      .send({ success: true, message: "Todo deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting the todo", error);
+    res.status(500).send({ success: false, error: error.message });
+  }
+};

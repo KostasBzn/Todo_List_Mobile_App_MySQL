@@ -93,3 +93,104 @@ export const findTodo = async (req, res) => {
     res.status(500).send({ success: false, error: error.message });
   }
 };
+
+// find todos for user by
+export const findTodosForUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    if (!userId) {
+      return res
+        .status(400)
+        .send({ success: false, message: "User ID is required" });
+    }
+
+    // todos for the user
+    const [rows] = await pool.query("SELECT * FROM todos WHERE user_id = ?", [
+      userId,
+    ]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .send({ success: false, message: "No todos found for the user" });
+    }
+
+    const todosForUser = rows;
+    res.status(200).send({ success: true, todosForUser });
+  } catch (error) {
+    console.error("Error finding todos for the user", error);
+    res.status(500).send({ success: false, error: error.message });
+  }
+};
+
+// update todo
+export const updateTodo = async (req, res) => {
+  try {
+    const todoId = req.params.todoId;
+    const { title, description, status } = req.body;
+
+    if (!todoId) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Todo ID is required" });
+    }
+
+    if (!title && !description && !status) {
+      return res.status(400).send({
+        success: false,
+        message:
+          "At least one field (title, description, status) is required for update",
+      });
+    }
+
+    // Build UPDATE query based on provided fields
+    let updateTodoQuery = "UPDATE todos SET ";
+    const updateValues = [];
+
+    if (title) {
+      updateTodoQuery += "title = ?, ";
+      updateValues.push(title);
+    }
+    if (description) {
+      updateTodoQuery += "description = ?, ";
+      updateValues.push(description);
+    }
+    if (status) {
+      updateTodoQuery += "status = ?, ";
+      updateValues.push(status);
+    }
+
+    // Remove the last comma and space
+    updateTodoQuery = updateTodoQuery.slice(0, -2);
+
+    // Add WHERE clause for specific todoId
+    updateTodoQuery += " WHERE _id = ?";
+    updateValues.push(todoId);
+
+    // Execute the update query
+    const [result] = await pool.query(updateTodoQuery, updateValues);
+
+    // Check if a todo was updated
+    if (result.affectedRows === 0) {
+      return res.status(404).send({
+        success: false,
+        message: "Todo not found or no fields provided for update",
+      });
+    }
+
+    const [updatedTodo] = await pool.query(
+      "SELECT * FROM todos WHERE _id = ?",
+      [todoId]
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Todo updated successfully",
+      updatedTodo,
+    });
+  } catch (error) {
+    console.error("Error updating the todo", error);
+    res.status(500).send({ success: false, error: error.message });
+  }
+};

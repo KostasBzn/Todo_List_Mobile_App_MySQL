@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 30,
     right: 30,
-    backgroundColor: colors.blueLight,
+    backgroundColor: colors.orange,
     width: 60,
     height: 60,
     borderRadius: 20,
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   floatingButtonText: {
     fontSize: 48,
-    color: colors.yellow,
+    color: colors.blueLight,
     fontWeight: "bold",
     textAlign: "center",
     textAlignVertical: "center",

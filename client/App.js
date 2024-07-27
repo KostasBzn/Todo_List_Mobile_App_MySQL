@@ -1,20 +1,51 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import IntroScreen from "./screens/IntroScreen.js";
+import SignInScreen from "./screens/SignInScreen.js";
+import SignUpScreen from "./screens/SignUpScreen.js";
+import TodosScreen from "./screens/TodosScreen.js";
+import AddTodoScreen from "./screens/AddTodoScreen.js";
+import UserProvider from "./contexts/userContext.js";
+import TodoProvider from "./contexts/todoContext.js";
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <UserProvider>
+        <TodoProvider>
+          <StatusBar style="auto" />
+          <Stack.Navigator initialRouteName="Intro">
+            <Stack.Screen
+              name="Intro"
+              component={IntroScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="SignIn"
+              component={SignInScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="SignUp"
+              component={SignUpScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="TodosList"
+              component={TodosScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AddTodo"
+              component={AddTodoScreen}
+              options={{ headerShown: false }}
+            />
+          </Stack.Navigator>
+        </TodoProvider>
+      </UserProvider>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ffc",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

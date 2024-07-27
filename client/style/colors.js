@@ -1,8 +1,8 @@
 export default {
-  blue: "#34b7f1",
-  tealGreen: "#128c7e",
-  lightGreen: "#25d366",
-  tealGreenDark: "#075e54",
-  pearlBush: "#ece5dd",
-  darkModeBack: "#222",
+  blue: "#244855",
+  orange: "#e64833",
+  brown: "#874f41",
+  blueLight: "#90aead",
+  beige: "#fbe9b0",
+  yellow: "#ffe400",
 };

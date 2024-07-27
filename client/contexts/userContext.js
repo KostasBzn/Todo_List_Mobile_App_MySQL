@@ -61,6 +61,7 @@ const UserProvider = ({ children }) => {
   const loggedUser = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (token) {
         const response = await axios.get(`${baseURL}/users/logged`);
 
@@ -79,14 +80,21 @@ const UserProvider = ({ children }) => {
     loggedUser();
   }, []);
 
+  //logout user
+  const logoutUser = async () => {
+    await AsyncStorage.removeItem("token");
+  };
+
   return (
     <UserContext.Provider
       value={{
         user,
         operationStatus,
+        setOperationStatus,
         error,
         signIn,
         signUp,
+        logoutUser,
       }}
     >
       {children}

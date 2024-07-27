@@ -21,7 +21,9 @@ app.use(cors(corsOptions));
 
 app.use("/users", userRoutes);
 app.use("/todos", todoRoutes);
+
 createTables();
+
 app.listen(port, () => {
   console.log(`The server is running in port ${port}`);
 });

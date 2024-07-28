@@ -1,22 +1,37 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+} from "react-native";
 import colors from "../style/colors";
 import TodoListNavbar from "../components/navbar/TodoListNavbar.js";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { TodoContext } from "../contexts/todoContext.js";
 import { useNavigation } from "@react-navigation/native";
+import { UserContext } from "../contexts/userContext.js";
 
 const TodosScreen = () => {
-  const { todos } = useContext(TodoContext);
+  const { todos, fetchTodosForUser } = useContext(TodoContext);
+  const { user } = useContext(UserContext);
 
   const navigation = useNavigation();
 
+  useEffect(() => {
+    fetchTodosForUser(user._id);
+  }, [user]);
+
+  const handleStatus = (id) => {
+    console.log("Change status todo with id:", id);
+  };
+
   const handleEdit = (id) => {
-    // Handle the edit action
     console.log("Edit todo with id:", id);
   };
 
   const handleDelete = (id) => {
-    // Handle the delete action
     console.log("Delete todo with id:", id);
   };
 
@@ -32,32 +47,55 @@ const TodosScreen = () => {
           <Text style={styles.emptyText}>Your list is empty</Text>
         </View>
       ) : (
-        todos.map((todo) => (
-          <View key={todo._id} style={styles.todoContainer}>
-            <Text style={styles.todoTitle}>{todo.title}</Text>
-            <Text style={styles.todoDescription}>{todo.description}</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => handleEdit(todo._id)}
-              >
-                <Image
-                  source={require("../assets/svg/edit.png")}
-                  style={styles.editLogo}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.button]}
-                onPress={() => handleDelete(todo._id)}
-              >
-                <Image
-                  source={require("../assets/svg/delete.png")}
-                  style={styles.editLogo}
-                />
-              </TouchableOpacity>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          {todos?.map((todo) => (
+            <View key={todo._id} style={styles.todoContainer}>
+              <Text style={styles.todoTitle}>{todo.title}</Text>
+              <Text style={styles.todoDescription}>{todo.description}</Text>
+              <View style={styles.buttonContainer}>
+                {todo.status === "pending" ? (
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => handleStatus(todo._id)}
+                  >
+                    <Image
+                      source={require("../assets/svg/pending.png")}
+                      style={styles.statusLogo}
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <View
+                    style={styles.button}
+                    onPress={() => handleStatus(todo._id)}
+                  >
+                    <Image
+                      source={require("../assets/svg/done.png")}
+                      style={styles.completedLogo}
+                    />
+                  </View>
+                )}
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => handleEdit(todo._id)}
+                >
+                  <Image
+                    source={require("../assets/svg/edit.png")}
+                    style={styles.editLogo}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => handleDelete(todo._id)}
+                >
+                  <Image
+                    source={require("../assets/svg/delete.png")}
+                    style={styles.deleteLogo}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))
+          ))}
+        </ScrollView>
       )}
       <TouchableOpacity
         style={styles.floatingButton}
@@ -73,6 +111,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.blue,
+    paddingTop: 100,
   },
   emptyContainer: {
     flex: 1,
@@ -84,16 +123,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.orange,
   },
+  scrollViewContent: {
+    paddingBottom: 100, // To ensure the floating button doesn't overlap the last item
+  },
   todoContainer: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.blueLight,
     margin: 10,
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingTop: 15,
     borderRadius: 8,
     elevation: 2, // For Android shadow
     shadowColor: "#000", // For iOS shadow
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    marginTop: 10,
   },
   todoTitle: {
     fontSize: 18,
@@ -108,23 +152,35 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 10,
   },
   button: {
-    backgroundColor: colors.tealGreen,
     padding: 10,
-    borderRadius: 5,
     flex: 1,
     alignItems: "center",
     marginHorizontal: 5,
   },
   deleteLogo: {
-    backgroundColor: colors.red,
+    width: 20,
+    height: 20,
+    tintColor: "red",
   },
   editLogo: {
-    backgroundColor: colors.red,
+    width: 20,
+    height: 20,
+    tintColor: "black",
   },
-
+  statusLogo: {
+    width: 20,
+    height: 20,
+    tintColor: colors.yellow,
+  },
+  completedLogo: {
+    width: 20,
+    height: 20,
+    tintColor: "green",
+  },
   floatingButton: {
     position: "absolute",
     bottom: 30,
@@ -132,7 +188,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.orange,
     width: 60,
     height: 60,
-    borderRadius: 20,
+    borderRadius: 30, // Changed to make it a perfect circle
     justifyContent: "center",
     alignItems: "center",
     elevation: 5, // Android shadow

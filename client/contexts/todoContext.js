@@ -6,7 +6,6 @@ export const TodoContext = createContext();
 
 const TodoProvider = ({ children }) => {
   const [todos, setTodos] = useState([]);
-  const [todosForUser, setTodosForUser] = useState([]);
   const [operationStatus, setOperationStatus] = useState({
     success: false,
     message: "",
@@ -76,7 +75,7 @@ const TodoProvider = ({ children }) => {
       const response = await axios.get(`${baseUrl}/todos/all/${userId}`);
 
       if (response.data.success) {
-        setTodosForUser(response.data.todosForUser);
+        setTodos(response.data.todosForUser);
       }
     } catch (error) {
       setError(error.message);
@@ -112,7 +111,6 @@ const TodoProvider = ({ children }) => {
     <TodoContext.Provider
       value={{
         todos,
-        todosForUser,
         operationStatus,
         error,
         createTodo,

@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingHorizontal: 20,
     zIndex: 10,
-    width: "60%",
+    width: "50%",
   },
   menuItem: {
     fontSize: 16,

@@ -8,14 +8,20 @@ import {
 } from "react-native";
 import colors from "../style/colors";
 import TodoListNavbar from "../components/navbar/TodoListNavbar.js";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { TodoContext } from "../contexts/todoContext.js";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../contexts/userContext.js";
 
 const TodosScreen = () => {
-  const { todos, fetchTodosForUser } = useContext(TodoContext);
+  const { todos, fetchTodosForUser, deleteTodo, updateTodo } =
+    useContext(TodoContext);
   const { user } = useContext(UserContext);
+
+  const [buttonIsLoading, setButtonIsLoading] = useState({
+    status: false,
+    button: "",
+  });
 
   const navigation = useNavigation();
 
@@ -23,16 +29,39 @@ const TodosScreen = () => {
     fetchTodosForUser(user._id);
   }, [user]);
 
-  const handleStatus = (id) => {
+  const handleStatus = async (id) => {
     console.log("Change status todo with id:", id);
+
+    try {
+      setButtonIsLoading({
+        status: true,
+        button: "status",
+      });
+      await updateTodo();
+    } catch (error) {
+      console.error("Error changing the status", error);
+    } finally {
+      setButtonIsLoading({ status: false });
+    }
   };
 
-  const handleEdit = (id) => {
+  const handleEdit = async (id) => {
     console.log("Edit todo with id:", id);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     console.log("Delete todo with id:", id);
+    try {
+      setButtonIsLoading({
+        status: true,
+        button: "delete",
+      });
+      await deleteTodo(id);
+    } catch (error) {
+      console.error("Error deleting the todo", error);
+    } finally {
+      setButtonIsLoading({ status: false });
+    }
   };
 
   const navigateToAddTodo = () => {
@@ -188,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.orange,
     width: 60,
     height: 60,
-    borderRadius: 30, // Changed to make it a perfect circle
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     elevation: 5, // Android shadow

@@ -26,7 +26,7 @@ const TodosScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetchTodosForUser(user._id);
+    fetchTodosForUser(user?._id);
   }, [user]);
 
   const handleStatus = async (id) => {

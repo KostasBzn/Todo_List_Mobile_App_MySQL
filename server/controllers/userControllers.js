@@ -33,7 +33,7 @@ export const registerUser = async (req, res) => {
       .json({ success: true, message: "New user created successfully!" });
   } catch (error) {
     console.error("Error creating new user");
-    res.status(500).send({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -62,24 +62,26 @@ export const loginUser = async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECTER_KEY, {
       expiresIn: "1d",
     });
-    res.status(200).send({ success: true, token, user });
+    res.status(200).json({ success: true, token, user });
   } catch (error) {
     console.error("Error login user");
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-//Logged user
+// Logged user
 export const loggedUser = async (req, res) => {
   try {
     const userId = req.user.userId;
+
     const [rows] = await pool.query("SELECT * FROM users WHERE _id = ?", [
       userId,
     ]);
     const user = rows[0];
-    res.status(500).send({ success: true, user });
+
+    res.status(200).json({ success: true, user });
   } catch (error) {
     console.error("Error logged user:", error.message);
-    res.status(200).send({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };

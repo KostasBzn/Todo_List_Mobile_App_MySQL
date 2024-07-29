@@ -30,6 +30,7 @@ const UserProvider = ({ children }) => {
           message: "User signed in successfully",
           type: "signIn",
         });
+
         await AsyncStorage.setItem("token", response.data.token);
       }
     } catch (error) {
@@ -59,9 +60,8 @@ const UserProvider = ({ children }) => {
 
   // Logged user
   const loggedUser = async () => {
+    const token = await AsyncStorage.getItem("token");
     try {
-      const token = await AsyncStorage.getItem("token");
-
       if (token) {
         const response = await axios.get(`${baseURL}/users/logged`);
 

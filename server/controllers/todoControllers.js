@@ -112,12 +112,6 @@ export const findTodosForUser = async (req, res) => {
       [userId]
     );
 
-    if (rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No todos found for the user" });
-    }
-
     const todosForUser = rows;
     res.status(200).json({ success: true, todosForUser });
   } catch (error) {

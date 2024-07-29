@@ -8,6 +8,7 @@ import TodosScreen from "./screens/TodosScreen.js";
 import AddTodoScreen from "./screens/AddTodoScreen.js";
 import UserProvider from "./contexts/userContext.js";
 import TodoProvider from "./contexts/todoContext.js";
+import EditScreen from "./screens/EditScreen.js";
 
 const Stack = createNativeStackNavigator();
 
@@ -41,6 +42,11 @@ export default function App() {
             <Stack.Screen
               name="AddTodo"
               component={AddTodoScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="EditTodo"
+              component={EditScreen}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>

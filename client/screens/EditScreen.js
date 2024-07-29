@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -9,20 +9,35 @@ import {
 } from "react-native";
 import colors from "../style/colors.js";
 import LoadingSpinner from "../components/loading/LoadingSpinner.js";
-import { useContext } from "react";
 import { TodoContext } from "../contexts/todoContext.js";
-import { useNavigation } from "@react-navigation/native";
-import { UserContext } from "../contexts/userContext.js";
+import { useRoute, useNavigation } from "@react-navigation/native";
 
-export default function CreateTodoScreen() {
-  const { createTodo } = useContext(TodoContext);
-  const { user } = useContext(UserContext);
+export default function EditTodoScreen() {
+  const { updateTodo, findTodo } = useContext(TodoContext);
+  const route = useRoute();
   const navigation = useNavigation();
+  const { todoId } = route.params;
   const [buttonIsLoading, setButtonIsLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("pending");
 
-  const handleCreate = async () => {
+  const getTodo = async () => {
+    try {
+      const todo = await findTodo(todoId);
+      setTitle(todo.title);
+      setDescription(todo.description);
+      //setStatus(todo.status);
+    } catch (error) {
+      console.error("Error fetching todo", error);
+    }
+  };
+
+  useEffect(() => {
+    getTodo();
+  }, [todoId]);
+
+  const handleSave = async () => {
     if (!title || !description) {
       Alert.alert("Error", "Please fill in all fields");
       return;
@@ -30,25 +45,27 @@ export default function CreateTodoScreen() {
 
     try {
       setButtonIsLoading(true);
-      await createTodo(user._id, title, description);
+      await updateTodo(todoId, title, description, status);
+      //console.log("Todo updated:", { id: todoId, title, description, status });
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Error", "Error creating todo");
-      console.error("Error creating todo", error);
+      Alert.alert("Error", "Error updating todo");
+      console.error("Error updating todo", error);
     } finally {
       setButtonIsLoading(false);
-      //setTitle("");
-      //setDescription("");
+      setTitle("");
+      setDescription("");
+      setStatus("pending");
     }
   };
 
   const handleCancel = () => {
-    navigation.goBack();
+    navigation.navigate("TodosList");
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create Todo</Text>
+      <Text style={styles.title}>Edit Todo</Text>
       <TextInput
         style={styles.input}
         placeholder="Title"
@@ -65,11 +82,11 @@ export default function CreateTodoScreen() {
       {buttonIsLoading ? (
         <View style={styles.loadingContainer}>
           <LoadingSpinner />
-          <Text style={styles.loadingText}>Creating...</Text>
+          <Text style={styles.loadingText}>Saving...</Text>
         </View>
       ) : (
-        <TouchableOpacity style={styles.button} onPress={handleCreate}>
-          <Text style={styles.buttonText}>Create</Text>
+        <TouchableOpacity style={styles.button} onPress={handleSave}>
+          <Text style={styles.buttonText}>Save</Text>
         </TouchableOpacity>
       )}
 

@@ -49,14 +49,14 @@ export const loginUser = async (req, res) => {
     if (!user) {
       return res
         .status(400)
-        .send({ success: false, message: "Email or password is wrong" });
+        .json({ success: false, message: "Email or password is wrong" });
     }
 
     const isMatched = await bcrypt.compare(password, user.password);
     if (!isMatched || !user) {
       return res
         .status(400)
-        .send({ success: false, message: "Email or password is wrong" });
+        .json({ success: false, message: "Email or password is wrong" });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECTER_KEY, {

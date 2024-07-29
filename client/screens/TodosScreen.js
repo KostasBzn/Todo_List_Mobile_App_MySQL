@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import colors from "../style/colors";
 import TodoListNavbar from "../components/navbar/TodoListNavbar.js";
+import LoadingSpinner from "../components/loading/LoadingSpinner.js";
 import { useContext, useEffect, useState } from "react";
 import { TodoContext } from "../contexts/todoContext.js";
 import { useNavigation } from "@react-navigation/native";
@@ -21,6 +22,7 @@ const TodosScreen = () => {
   const [buttonIsLoading, setButtonIsLoading] = useState({
     status: false,
     button: "",
+    buttonId: "",
   });
 
   const navigation = useNavigation();
@@ -29,38 +31,41 @@ const TodosScreen = () => {
     fetchTodosForUser(user?._id);
   }, [user]);
 
-  const handleStatus = async (id) => {
-    console.log("Change status todo with id:", id);
-
+  // Handle status update
+  const handleStatus = async (id, title, description, status) => {
     try {
       setButtonIsLoading({
         status: true,
         button: "status",
+        buttonId: id,
       });
-      await updateTodo();
+
+      await updateTodo(id, title, description, status);
     } catch (error) {
       console.error("Error changing the status", error);
     } finally {
-      setButtonIsLoading({ status: false });
+      setButtonIsLoading({ status: false, button: "", buttonId: "" });
     }
   };
 
-  const handleEdit = async (id) => {
-    console.log("Edit todo with id:", id);
+  // Handle edit todo
+  const handleEdit = (id) => {
+    navigation.navigate("EditTodo", { todoId: id });
   };
 
+  // Handle delete todo
   const handleDelete = async (id) => {
-    console.log("Delete todo with id:", id);
     try {
       setButtonIsLoading({
         status: true,
         button: "delete",
+        buttonId: id,
       });
       await deleteTodo(id);
     } catch (error) {
       console.error("Error deleting the todo", error);
     } finally {
-      setButtonIsLoading({ status: false });
+      setButtonIsLoading({ status: false, button: "", buttonId: "" });
     }
   };
 
@@ -85,18 +90,30 @@ const TodosScreen = () => {
                 {todo.status === "pending" ? (
                   <TouchableOpacity
                     style={styles.button}
-                    onPress={() => handleStatus(todo._id)}
+                    onPress={() =>
+                      handleStatus(
+                        todo._id,
+                        todo.title,
+                        todo.description,
+                        "completed"
+                      )
+                    }
                   >
-                    <Image
-                      source={require("../assets/svg/pending.png")}
-                      style={styles.statusLogo}
-                    />
+                    {buttonIsLoading.status &&
+                    buttonIsLoading.button === "status" &&
+                    buttonIsLoading.buttonId === todo._id ? (
+                      <View style={styles.loadingContainer}>
+                        <LoadingSpinner />
+                      </View>
+                    ) : (
+                      <Image
+                        source={require("../assets/svg/pending.png")}
+                        style={styles.statusLogo}
+                      />
+                    )}
                   </TouchableOpacity>
                 ) : (
-                  <View
-                    style={styles.button}
-                    onPress={() => handleStatus(todo._id)}
-                  >
+                  <View style={styles.button}>
                     <Image
                       source={require("../assets/svg/done.png")}
                       style={styles.completedLogo}
@@ -116,10 +133,18 @@ const TodosScreen = () => {
                   style={styles.button}
                   onPress={() => handleDelete(todo._id)}
                 >
-                  <Image
-                    source={require("../assets/svg/delete.png")}
-                    style={styles.deleteLogo}
-                  />
+                  {buttonIsLoading.status &&
+                  buttonIsLoading.button === "delete" &&
+                  buttonIsLoading.buttonId === todo._id ? (
+                    <View style={styles.loadingContainer}>
+                      <LoadingSpinner />
+                    </View>
+                  ) : (
+                    <Image
+                      source={require("../assets/svg/delete.png")}
+                      style={styles.deleteLogo}
+                    />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -153,7 +178,7 @@ const styles = StyleSheet.create({
     color: colors.orange,
   },
   scrollViewContent: {
-    paddingBottom: 100, // To ensure the floating button doesn't overlap the last item
+    paddingBottom: 100,
   },
   todoContainer: {
     backgroundColor: colors.blueLight,
@@ -209,6 +234,10 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     tintColor: "green",
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   floatingButton: {
     position: "absolute",

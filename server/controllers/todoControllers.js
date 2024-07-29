@@ -4,12 +4,13 @@ import { v1 as uuidv1 } from "uuid";
 //Create new Todo
 export const newTodo = async (req, res) => {
   const { userId, title, description } = req.body;
+
   try {
     const uuid = uuidv1();
     if (!userId || !title || !description) {
       return res
         .status(400)
-        .send({ success: false, message: "Required fields are missing" });
+        .json({ success: false, message: "Required fields are missing" });
     }
 
     const insertTodoQuery =
@@ -24,11 +25,11 @@ export const newTodo = async (req, res) => {
     const newTodo = rows[0];
 
     res
-      .status(500)
-      .send({ success: true, message: "New todo created", todo: newTodo });
+      .status(200)
+      .json({ success: true, message: "New todo created", todo: newTodo });
   } catch (error) {
     console.error("Error creating new todo");
-    res.status(500).send({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -40,7 +41,7 @@ export const deleteTodo = async (req, res) => {
     if (!todoId) {
       return res
         .status(400)
-        .send({ success: false, message: "Todo ID is required" });
+        .json({ success: false, message: "Todo ID is required" });
     }
 
     // find and delete todo from the database
@@ -51,15 +52,15 @@ export const deleteTodo = async (req, res) => {
     if (result.affectedRows === 0) {
       return res
         .status(404)
-        .send({ success: false, message: "Todo not found" });
+        .json({ success: false, message: "Todo not found" });
     }
 
     res
       .status(200)
-      .send({ success: true, message: "Todo deleted successfully" });
+      .json({ success: true, message: "Todo deleted successfully" });
   } catch (error) {
     console.error("Error deleting the todo", error);
-    res.status(500).send({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -72,7 +73,7 @@ export const findTodo = async (req, res) => {
     if (!todoId) {
       return res
         .status(400)
-        .send({ success: false, message: "Todo ID is required" });
+        .json({ success: false, message: "Todo ID is required" });
     }
 
     const [rows] = await pool.query("SELECT * FROM todos WHERE _id = ?", [
@@ -83,14 +84,14 @@ export const findTodo = async (req, res) => {
     if (rows.length === 0) {
       return res
         .status(404)
-        .send({ success: false, message: "Todo not found" });
+        .json({ success: false, message: "Todo not found" });
     }
 
     const todo = rows[0];
-    res.status(200).send({ success: true, todo });
+    res.status(200).json({ success: true, todo });
   } catch (error) {
     console.error("Error finding the todo", error);
-    res.status(500).send({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -102,25 +103,26 @@ export const findTodosForUser = async (req, res) => {
     if (!userId) {
       return res
         .status(400)
-        .send({ success: false, message: "User ID is required" });
+        .json({ success: false, message: "User ID is required" });
     }
 
     // todos for the user
-    const [rows] = await pool.query("SELECT * FROM todos WHERE user_id = ?", [
-      userId,
-    ]);
+    const [rows] = await pool.query(
+      "SELECT * FROM todos WHERE user_id = ? ORDER BY created_at ASC",
+      [userId]
+    );
 
     if (rows.length === 0) {
       return res
         .status(404)
-        .send({ success: false, message: "No todos found for the user" });
+        .json({ success: false, message: "No todos found for the user" });
     }
 
     const todosForUser = rows;
-    res.status(200).send({ success: true, todosForUser });
+    res.status(200).json({ success: true, todosForUser });
   } catch (error) {
     console.error("Error finding todos for the user", error);
-    res.status(500).send({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -133,14 +135,13 @@ export const updateTodo = async (req, res) => {
     if (!todoId) {
       return res
         .status(400)
-        .send({ success: false, message: "Todo ID is required" });
+        .json({ success: false, message: "Todo ID is required" });
     }
 
     if (!title && !description && !status) {
-      return res.status(400).send({
+      return res.status(400).json({
         success: false,
-        message:
-          "At least one field (title, description, status) is required for update",
+        message: "Title, description or status is missing",
       });
     }
 
@@ -173,24 +174,25 @@ export const updateTodo = async (req, res) => {
 
     // Check if a todo was updated
     if (result.affectedRows === 0) {
-      return res.status(404).send({
+      return res.status(404).json({
         success: false,
         message: "Todo not found or no fields provided for update",
       });
     }
 
-    const [updatedTodo] = await pool.query(
-      "SELECT * FROM todos WHERE _id = ?",
-      [todoId]
-    );
+    const [rows] = await pool.query("SELECT * FROM todos WHERE _id = ?", [
+      todoId,
+    ]);
 
-    res.status(200).send({
+    const updatedTodo = rows[0];
+
+    res.status(200).json({
       success: true,
       message: "Todo updated successfully",
       updatedTodo,
     });
   } catch (error) {
     console.error("Error updating the todo", error);
-    res.status(500).send({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };

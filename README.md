@@ -1,13 +1,19 @@
-### **ToDo Mate Task Manager Mobile App**
+# ✅ **ToDo Mate Task Manager Mobile App**
 
-- **Features:**
+A task management app built with **React Native** for both Android and iOS, allowing users to manage their daily tasks on the go.
 
-  - Register - Login with email authentication / error handling
-  - Create tasks
-  - Mark as done
-  - Edit tasks
+## 🎮 **App Features**
+- **User Authentication**: Register and log in with email authentication and error handling.
+- **Task Management**: 
+  - Create new tasks
+  - Mark tasks as done
+  - Edit existing tasks
   - Delete tasks
+- **Database**: Uses MySQL to store task data.
 
-  Note: For this project i used mySQL database
+## 🚀 **Technologies Used**
+- **Frontend**: React Native
+- **Backend**: MySQL Database
 
---Its a project written in React Native for Android and IOS mobiles--
+*This project was created as a task manager mobile app using React Native for Android and iOS platforms.*
+
